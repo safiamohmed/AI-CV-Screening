@@ -388,7 +388,7 @@ function addMsg(cls, text) {
   $("#msgs").append(d); $("#msgs").scrollTop = $("#msgs").scrollHeight;
   return d;
 }
-addMsg("bot", "Hi! I am your HR assistant. Ask me about leave, working hours, Ramadan hours or benefits. / اسألني عن سياسات الشركة.");
+addMsg("bot", "Hello 👋 I'm the Horizon Byte HR assistant. Ask me about annual leave, working hours, the Ramadan schedule or benefits, in English or Arabic.\n\nأهلاً 👋 اسألني عن الإجازات ومواعيد العمل .");
 async function askHR(q) {
   addMsg("me", q);
   const bot = addMsg("bot", "…");
