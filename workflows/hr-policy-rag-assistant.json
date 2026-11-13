@@ -1,0 +1,159 @@
+{
+  "name": "HR Policy RAG Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "hostedChat",
+        "options": {
+          "allowedOrigins": "https://YOUR-USERNAME.github.io"
+        }
+      },
+      "id": "b0000000-0000-4000-8000-000000000001",
+      "name": "Employee Question",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "b0000000-0000-4000-8000-0000000000aa"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the HR policy assistant of the company. Always search the policy documents with the tool before answering, and answer ONLY from what the search returns. Quote the relevant rule and name the source document. Reply in the same language as the question (English or Arabic). If nothing relevant is found, reply: \"I could not find this in the company policies. Please contact HR directly.\" Never invent numbers, dates or rules. Keep answers short and clear."
+        }
+      },
+      "id": "b0000000-0000-4000-8000-000000000002",
+      "name": "HR Assistant",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "id": "b0000000-0000-4000-8000-000000000003",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        160,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 6
+      },
+      "id": "b0000000-0000-4000-8000-000000000004",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search the company HR policy documents (leave, working hours, Ramadan hours, benefits, conduct). Use it for every question.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "hr_policies",
+          "mode": "list",
+          "cachedResultName": "hr_policies"
+        },
+        "topK": 4
+      },
+      "id": "b0000000-0000-4000-8000-000000000005",
+      "name": "Search HR Policies",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "id": "c0000000-0000-4000-8000-000000000006",
+      "name": "Gemini Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        520,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Employee Question": {
+      "main": [
+        [
+          {
+            "node": "HR Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "HR Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "HR Assistant",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search HR Policies": {
+      "ai_tool": [
+        [
+          {
+            "node": "HR Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Search HR Policies",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
