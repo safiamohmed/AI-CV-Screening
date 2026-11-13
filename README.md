@@ -23,3 +23,4 @@ Google Sheets, Google Drive and Gmail (OAuth), an LLM provider (Groq or Gemini),
 4. Sheet columns: `name, email, position, motivation, cv_file_id, status, score, decision, notes`.
 5. Replace the HR email address in the Gmail nodes.
 6. Publish both workflows.
+
