@@ -2,7 +2,7 @@
 
 An n8n automation that reads job applications, reads each CV (PDF or scanned, with OCR), scores it with AI against the job requirements, and emails the candidate and HR. Built by Safia.
 
-**Live site:** https://YOUR-USERNAME.github.io/YOUR-REPO/ (works only while the owner's n8n and ngrok are running)
+**Live site:** https://safiamohmed.github.io/AI-CV-Screening/ (works only while the owner's n8n and ngrok are running)
 
 ## Workflows
 
