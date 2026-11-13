@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safia</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #eee; }
+.badge.on { background: #d7f5e3; } .badge.off { background: #fde2e2; }
+a.disabled { pointer-events: none; opacity: .5; }
+</style>
+</head>
+<body>
+<h1>Safia</h1>
+<p>Apply for a job and your CV is read, scored and answered automatically. Built with n8n.</p>
+<span class="badge" id="status">Checking…</span>
+<h2>Apply</h2>
+<p><a id="applyLink" target="_blank" rel="noopener">Apply for a job</a></p>
+<script>
+const CONFIG = {
+  n8nBase: "https://cytotropic-siobhan-woodsy.ngrok-free.dev",
+  applyForm: "/form/7433b20c-bcc0-4241-a797-45e76dec62da"
+};
+const $ = s => document.querySelector(s);
+$("#applyLink").href = CONFIG.n8nBase + CONFIG.applyForm;
+function setStatus(online) {
+  $("#status").textContent = online ? "Online" : "Offline, please try again later";
+  $("#status").className = "badge " + (online ? "on" : "off");
+  document.querySelectorAll("#applyLink").forEach(a => a.classList.toggle("disabled", !online));
+}
+// Any answer from the form means n8n and ngrok are both running.
+// When either is off, ngrok's error page has no CORS headers, so fetch fails.
+async function checkStatus() {
+  try {
+    await fetch(CONFIG.n8nBase + CONFIG.applyForm, { mode: "no-cors" });
+    setStatus(true);
+  } catch (err) { setStatus(false); }
+}
+checkStatus();
+</script>
+</body>
+</html>
