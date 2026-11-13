@@ -36,7 +36,7 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .badge{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:600;background:var(--card2);border:1px solid var(--line)}
 .badge i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
 .badge.on i{background:var(--ok);box-shadow:0 0 0 4px rgba(34,197,94,.2)}
-.badge.off i{background:var(--bad);box-shadow:0 0 0 4px rgba(239,68,68,.2)}
+.badge.idle i{background:var(--warn);box-shadow:0 0 0 4px rgba(245,158,11,.2)}
 
 /* hero */
 .hero{padding:84px 0 56px;text-align:center;background:radial-gradient(60% 50% at 50% 0%,rgba(124,92,255,.22),transparent 70%),radial-gradient(40% 40% at 85% 10%,rgba(255,109,90,.18),transparent 70%)}
@@ -320,12 +320,12 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
     <h2>Download the n8n blueprints</h2>
     <p class="sub">Cleaned copies with credentials and IDs removed. Import each file into n8n and connect your own accounts.</p>
     <div class="dl">
-      <a href="workflows/recruitment-1-intake.json" download><div>intake.json<small>Application form</small></div><span>&#8595;</span></a>
-      <a href="workflows/recruitment-2-ai-scan.json" download><div>ai-scan.json<small>AI screening</small></div><span>&#8595;</span></a>
-      <a href="workflows/recruitment-3-error-handler.json" download><div>error-handler.json<small>Monitoring</small></div><span>&#8595;</span></a>
-      <a href="workflows/hr-policy-rag-assistant.json" download><div>hr-policy-rag-assistant.json<small>RAG chat</small></div><span>&#8595;</span><a>
+      <a href="workflows/recruitment-1-intake.json" download><div>recruitment-1-intake.json<small>Application form</small></div><span>&#8595;</span></a>
+      <a href="workflows/recruitment-2-ai-scan.json" download><div>recruitment-2-ai-scan.json<small>AI screening</small></div><span>&#8595;</span></a>
+      <a href="workflows/recruitment-3-error-handler.json" download><div>recruitment-3-error-handler.json<small>Monitoring</small></div><span>&#8595;</span></a>
+      <a href="workflows/hr-policy-rag-assistant.json" download><div>hr-policy-rag-assistant.json<small>RAG chat</small></div><span>&#8595;</span></a>
       <a href="workflows/policy-loader.json" download><div>policy-loader.json<small>Knowledge base loader</small></div><span>&#8595;</span></a>
-      
+      <a href="workflows/status-ping.json" download><div>status-ping.json<small>Online / offline badge</small></div><span>&#8595;</span></a>
     </div>
   </div>
 </section>
@@ -337,12 +337,18 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <script>
 /* ===== Fill these in (see Step 3 and Step 9 of the guide) ===== */
 const CONFIG = {
-  owner:      "Your Name",
-  repo:       "https://github.com/YOUR-USER/YOUR-REPO",
-  n8nBase:    "https://YOUR-DOMAIN.ngrok-free.app",
-  applyForm:  "/form/YOUR-APPLY-FORM-ID",
-  chat:       "/webhook/YOUR-CHAT-ID/chat",      // Production URL of the Employee Question (Chat Trigger) node
-  statusPath: "/webhook/status-ping"   // from workflows/status-ping.json (activate it first)
+  owner:      "safiamohmed",
+  repo:       "https://github.com/safiamohmed/AI-CV-Screening",
+  n8nBase:    "https://cytotropic-siobhan-woodsy.ngrok-free.dev",
+  applyForm:  "/form/7433b20c-bcc0-4241-a797-45e76dec62da",
+  chat:       "/webhook/b0000000-0000-4000-8000-0000000000aa/chat",      // Production URL of the Employee Question (Chat Trigger) node
+  statusPath: "/webhook/status-ping",  // from workflows/status-ping.json (activate it first)
+  // Shown only when the live assistant is not reachable. Replace with answers from YOUR real policies.
+  samples: [
+    { q: "How many annual leave days do I get?", a: "Write the real answer from your leave policy here." },
+    { q: "ما هو نظام الشغل في رمضان؟",              a: "اكتبي هنا الإجابة الحقيقية من سياسة العمل في رمضان." },
+    { q: "What are the working hours?",           a: "Write the real answer from your working hours policy here." }
+  ]
 };
 /* =============================================================== */
 
@@ -353,9 +359,8 @@ $("#repoLink").href = CONFIG.repo;
 $("#owner").textContent = CONFIG.owner;
 
 function setStatus(online) {
-  $("#statusText").textContent = online ? "System online" : "Offline, please try later";
-  $("#status").className = "badge " + (online ? "on" : "off");
-  ["#applyTop", "#applyCard"].forEach(id => $(id).classList.toggle("disabled", !online));
+  $("#statusText").textContent = online ? "Live system online" : "Preview mode";
+  $("#status").className = "badge " + (online ? "on" : "idle");
 }
 
 // If n8n or ngrok is off, the request fails and the site shows Offline.
@@ -397,7 +402,10 @@ async function askHR(q) {
     if (!r.ok) throw new Error("HTTP " + r.status);
     bot.textContent = (await r.json()).output || "No answer received.";
   } catch (err) {
-    bot.textContent = "The HR assistant is offline right now. Please try again later.";
+    const hit = (CONFIG.samples || []).find(x => x.q === q);
+    bot.textContent = hit
+      ? "Sample answer (the live assistant is not connected right now):\n" + hit.a
+      : "The live assistant is not connected right now. Try one of the sample questions below.";
     setStatus(false);
   } finally { $("#ask button").disabled = false; }
 }
